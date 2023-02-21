@@ -3,5 +3,45 @@
 Components to create:
 
 1. checkers.hs
-2. play.hs
-3. minimax.hs
+  - internal state (2d array)
+  - result (have to print board to console)
+  - action defines available actions
+2. moves (determine possible moves)
+3. play.hs
+4. minimax.hs
+
+
+
+Board:
+
+use 1234 2d array
+(0, 0) is bottom left corner
+Odd numbers = black
+Even numbers = white
+
+1,2 = common pieces
+3,4 = kings
+
+Input: 
+
+[(start), (jumps), (end)]
+
+Output: 
+
+print state of the board, only have to print one direction because only playing against ai
+
+Methods:
+
+Chris 
+- getAvailableMoves()     
+     - getJumpMoves()
+     - getNormalMoves()
+
+Avery
+- initializeState()
+
+Jordan
+- checkWin()
+- printBoard()
+
+
