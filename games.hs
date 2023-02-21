@@ -1,63 +1,71 @@
 -- CPSC 312 - 2023 - Games in Haskell
-module Games2 
-  (State(..), Result(..), Game, Rands, Player,  mkRands) where
--- To load it, try:
+module MagicSum where
+
+-- To run it, try:
 -- ghci
--- :load Games2
+-- :load MagicSum
 
--- you may have to do:     cabal install --lib random
-import System.Random
-
-
--- gs=game_state  act=action 
-data State gs act = State gs [act]  -- internal_state available_actions
+data State = State InternalState [Action]  -- internal_state available_actions
          deriving (Ord, Eq, Show)
 
-data Result gs act =
-              EndOfGame String Double (State gs act)    -- end of game: message, value, starting state
-            | ContinueGame Double (State gs act)        -- continue with reward and new state
+data Result = EndOfGame Double State    -- end of game: value, starting state
+            | ContinueGame State        -- continue with new state
          deriving (Eq, Show)
 
-type Game gs act = act -> State gs act -> Result gs act
+type Game = Action -> State -> Result
 
--- gs=game_state  act=action ps=player_state
-type Player gs act ps = Game gs  act -> Result gs act -> ps -> (act, ps)
+type Player = State -> Action
 
-------
--- trand test random numbers
-trand :: IO Bool
-trand = do
-  g <- newStdGen   -- use getStdGen to get same random number generator each time
-  return (ace_first [min 10 ( 1+ (abs n) `mod` 13) | n <- (randoms g :: [Int])])
+------ The Magic Sum Game -------
 
--- ace_first deck   is true if an Ace (1) comes before a picture card (10 - K)
-ace_first :: (Eq a, Num a) => [a] -> Bool
-ace_first (1:_) = True
-ace_first (10:_) = False
-ace_first (_:t) = ace_first t
+data Action = Action Int                   -- a move for a player is just an Int
+         deriving (Ord,Eq)
+type InternalState = ([Action],[Action])   -- (self,other)
 
 
--------- The following can be used to implement a deck in a game.
--- Put this in your game, and don't export a way to create or access RandsC.
--- for random numbers in states, do not allow print or comparisons to depend on them
--- Don't export access to the constructor. So no one else can look at them or construct them
--- i.e., export Rands, but not RandsC (see top of file)
-data Rands = RandsC [Double]    -- random numbers. Do not print or compare them!!!
-instance Show Rands where
-   show _ = "_"
-instance Eq Rands where
-   x == y = True
-instance Ord Rands where
-   -- x < y = False
-   x <= y = True
+magicsum :: Game
+magicsum move (State (mine,others) available) 
+    | win move mine                = EndOfGame 1  magicsum_start     -- agent wins
+    | available == [move]          = EndOfGame 0  magicsum_start     -- no more moves, tie
+    | otherwise                    =
+          ContinueGame (State (others,(move:mine))   -- note roles have flipped
+                        [act | act <- available, act /= move])
 
--- Make randoms (can be used in a do)
-mkRands :: RandomGen g => g -> Rands
-mkRands rg = RandsC (randoms rg)
+-- win n ns = the agent wins if it selects n given it has already selected ns
+win :: Action -> [Action] -> Bool
+win (Action n) ns  = or [n+x+y==15 | Action x <- ns, Action y <- ns, x/=y]
 
-test_mkRands :: IO Rands
-test_mkRands =
-  do 
-    g1 <- newStdGen
-    return (mkRands g1)
-  
+
+magicsum_start = State ([],[]) [Action n | n <- [1..9]]
+
+-- show and read actions just as the integer
+instance Show Action where
+    show (Action i) = show i
+instance Read Action where
+    readsPrec i st =  [(Action a,rst) | (a,rst) <- readsPrec i st]
+
+------- A Player -------
+
+simple_player :: Player
+-- this player has an ordering of the moves, and chooses the first one available
+simple_player (State _ avail) = head [Action e | e <- [5,6,4,2,8,1,3,7,9],
+                                               Action e `elem` avail]
+
+
+-- Test cases
+-- magicsum (simple_player magicsum_start) magicsum_start
+a i = Action i  -- make it easier to type
+as lst = [Action i | i <- lst]
+-- magicsum (a 6) (State (as [3,5], as [2,7]) (as [1,4,6,8,9])) 
+-- magicsum (a 3) (State (as [5,7], as [2,9]) (as [1,3,4,6,8])) 
+
+
+
+
+
+
+-- Why is it called the "magic sum game"?
+-- The following is a magic square:
+-- 294
+-- 753
+-- 618
