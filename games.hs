@@ -22,8 +22,8 @@ data Action = Action Int                   -- a move for a player is just an Int
          deriving (Ord,Eq)
 type InternalState = ([Action],[Action])   -- (self,other)
 
-initialColumn = [0,1,0,0,0,1,0,1]
-reverseInitialColumn = [1,0,1,0,0,0,1,0]
+initialColumn = [0,2,0,0,0,1,0,1]
+reverseInitialColumn = [2,0,2,0,0,0,1,0]
 
 initialState = [initialColumn, reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn]
 
