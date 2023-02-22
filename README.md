@@ -19,6 +19,7 @@ use 1234 2d array
 Odd numbers = black
 Even numbers = white
 
+0 = empty
 1,2 = common pieces
 3,4 = kings
 
