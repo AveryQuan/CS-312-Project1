@@ -22,6 +22,11 @@ data Action = Action Int                   -- a move for a player is just an Int
          deriving (Ord,Eq)
 type InternalState = ([Action],[Action])   -- (self,other)
 
+initialState = [initialColumn, reverseInitialColumn,initialColumn,
+reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn]
+
+initialColumn = [0,1,0,0,0,1,0,1]
+reverseInitialColumn = [1,0,1,0,0,0,1,0]
 
 magicsum :: Game
 magicsum move (State (mine,others) available) 
