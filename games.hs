@@ -25,7 +25,25 @@ type InternalState = ([Action],[Action])   -- (self,other)
 initialColumn = [0,2,0,0,0,1,0,1]
 reverseInitialColumn = [2,0,2,0,0,0,1,0]
 
-initialState = [initialColumn, reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn]
+initialState = [initialColumn, reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn,reverseInitialColumn]
+
+getNormalMoves state = getNormalMovesHelp state 0 0
+
+getNormalMovesHelp [] _ _ = []
+getNormalMovesHelp state row col 
+    | state !! row !! col /= 0 = []
+
+getNormalMovesSquare [] _ _ = []
+getNormalMovesSquare state row col 
+    | state !! row !! col == 0 = [] --Empty square, no move
+
+getDirectionalMovesSquare state row col dir 
+    | state !! row !! col == 0 = [] -- Empty
+    | dir == "left" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [(row,col),(row-1,col+1)] -- Can't move left diagonally if on topmost row or on rightmost column
+    | dir == "right" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [(row,col),(row+1,col+1)] -- Can't move right diagonally if on topmost row or on rightmost column
+    | dir == "bLeft" = if (col == 0 || row == 0 || (state !! (row-1) !! (col-1)) /= 0) then [] else [(row,col),(row+1,col+1)]
+    | dir == "bRight" = if (col == 0 || row == 7 || (state !! (row+1) !! (col-1)) /= 0) then [] else [(row,col),(row+1,col+1)] 
+
 
 magicsum :: Game
 magicsum move (State (mine,others) available) 
