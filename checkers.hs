@@ -76,7 +76,8 @@ instance Read Action where
 
 ------- A Player -------
 
--- TODO: can remove this code, create minimax instead
+-- TODO: player that picks a random move from list of all available moves
+-- prereq: function to generate all available moves given State
 -- simple_player :: Player
 -- this player has an ordering of the moves, and chooses the first one available
 -- simple_player (State _ avail) = head [Action e | e <- [5,6,4,2,8,1,3,7,9],
