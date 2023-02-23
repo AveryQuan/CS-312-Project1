@@ -27,6 +27,7 @@ type InternalState = ([Action],[Action])   -- (self,other)
 initialColumn = [0,2,0,0,0,1,0,1]
 reverseInitialColumn = [2,0,2,0,0,0,1,0]
 
+initialState :: Board
 initialState = [initialColumn, reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn,reverseInitialColumn]
 
 getNormalMoves state = getNormalMovesHelp state 0 0
@@ -72,7 +73,7 @@ instance Read Action where
 ------- A Player -------
 
 -- TODO: can remove this code, create minimax instead
-simple_player :: Player
+-- simple_player :: Player
 -- this player has an ordering of the moves, and chooses the first one available
 -- simple_player (State _ avail) = head [Action e | e <- [5,6,4,2,8,1,3,7,9],
 --                                                Action e `elem` avail]
@@ -86,12 +87,35 @@ simple_player :: Player
 -- magicsum (a 3) (State (as [5,7], as [2,9]) (as [1,3,4,6,8])) 
 
 
+------- temporary -------
+type Board = [[Int]]
 
+printBoard :: Board -> IO()
+printBoard board = do
+    putStr (unlines [formattedRow (board !! y) y | y <- [idxs-1,idxs-2..0]])
+    putStrLn "     0   1   2   3   4   5   6   7  " -- TODO: make modular for any size
+      where idxs = length board
 
+formattedRow :: Show a => [Int] -> a -> String
+formattedRow row idx = 
+    show idx ++ "  " ++ (printRow row) ++ " |"
+      where printRow row = unwords ["| " ++ (convertValueToPiece x) | x <- row]
 
+convertValueToPiece :: Int -> String
+convertValueToPiece value
+   | value == 1   = "b"
+   | value == 2   = "w"
+   | value == 3   = "B"
+   | value == 4   = "W"
+   | otherwise    = " "
 
--- Why is it called the "magic sum game"?
--- The following is a magic square:
--- 294
--- 753
--- 618
+-- testBoards:
+testBoard :: [[Int]]
+testBoard = [[0, 1, 0, 0, 0, 2, 0, 0],
+            [1, 0, 0, 0, 2, 0, 0, 0],
+            [0, 0, 0, 1, 0, 2, 0, 2],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+            [0, 1, 0, 1, 0, 2, 0, 2],
+            [1, 0, 1, 0, 2, 0, 2, 0],
+            [0, 0, 0, 0, 0, 2, 0, 2],
+            [0, 0, 1, 0, 0, 0, 0, 0]]
