@@ -92,8 +92,12 @@ type Board = [[Int]]
 
 printBoard :: Board -> IO()
 printBoard board = do
-    putStr (unlines [formattedRow (board !! y) y | y <- [idxs-1,idxs-2..0]])
-    putStrLn "     0   1   2   3   4   5   6   7  " -- TODO: make modular for any size
+    let a = [formattedRow (board !! y) y | y <- [idxs-1,idxs-2..0]]
+    let linePadding = unwords ("   " : ["---" | x <-[0..idxs-1]])
+    let b = concat (map (\x -> [x] ++ [linePadding]) a)
+    putStr (unlines (linePadding : b))
+    putStr ("    ") -- padding
+    putStrLn (unwords [" " ++ show x ++ " " | x <- [0..idxs-1]])
       where idxs = length board
 
 formattedRow :: Show a => [Int] -> a -> String
