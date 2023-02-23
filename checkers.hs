@@ -24,11 +24,11 @@ data Action = Action Int                   -- a move for a player is just an Int
 -- TODO: redefine InternalState
 type InternalState = ([Action],[Action])   -- (self,other)
 
-initialColumn = [0,2,0,0,0,1,0,1]
-reverseInitialColumn = [2,0,2,0,0,0,1,0]
+initialRow = [0,2,0,0,0,1,0,1]
+reverseinitialRow = [2,0,2,0,0,0,1,0]
 
 initialState :: Board
-initialState = [initialColumn, reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn,reverseInitialColumn,initialColumn,reverseInitialColumn]
+initialState = [initialRow, reverseinitialRow,initialRow,reverseinitialRow,initialRow,reverseinitialRow,initialRow,reverseinitialRow]
 
 getNormalMoves state = getNormalMovesHelp state 0 0
 
