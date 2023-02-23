@@ -36,16 +36,20 @@ getNormalMovesHelp [] _ _ = []
 getNormalMovesHelp state row col 
     | state !! row !! col /= 0 = []
 
+-- Gets all possible normal moves for a square by first checking its content.
 getNormalMovesSquare [] _ _ = []
 getNormalMovesSquare state row col 
     | state !! row !! col == 0 = [] --Empty square, no move
+    | state !! row !! col == 1 = getDirectionalMovesSquare state row col "bLeft" ++ getDirectionalMovesSquare state row col "bRight"  -- This is the left and right of a black piece going from the right side of the board to the left.
+    | state !! row !! col == 2 = getDirectionalMovesSquare state row col "left" ++ getDirectionalMovesSquare state row col "right"   -- This is the left and right of a red piece going from the left side of the board to the right.
+    | state !! row !! col >= 3 = getDirectionalMovesSquare state row col "bLeft" ++ getDirectionalMovesSquare state row col "bRight" ++ getDirectionalMovesSquare state row col "left" ++ getDirectionalMovesSquare state row col "right"  -- Kings move in 1 of 4 diag
 
 getDirectionalMovesSquare state row col dir 
     | state !! row !! col == 0 = [] -- Empty
-    | dir == "left" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [(row,col),(row-1,col+1)] -- Can't move left diagonally if on topmost row or on rightmost column
-    | dir == "right" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [(row,col),(row+1,col+1)] -- Can't move right diagonally if on topmost row or on rightmost column
-    | dir == "bLeft" = if (col == 0 || row == 0 || (state !! (row-1) !! (col-1)) /= 0) then [] else [(row,col),(row+1,col+1)]
-    | dir == "bRight" = if (col == 0 || row == 7 || (state !! (row+1) !! (col-1)) /= 0) then [] else [(row,col),(row+1,col+1)] 
+    | dir == "left" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [[(row,col),(row-1,col+1)]] -- Can't move left diagonally if on topmost row or on rightmost column
+    | dir == "right" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [[(row,col),(row+1,col+1)]] -- Can't move right diagonally if on topmost row or on rightmost column
+    | dir == "bLeft" = if (col == 0 || row == 0 || (state !! (row-1) !! (col-1)) /= 0) then [] else [[(row,col),(row-1,col-1)]]
+    | dir == "bRight" = if (col == 0 || row == 7 || (state !! (row+1) !! (col-1)) /= 0) then [] else [[(row,col),(row+1,col-1)]] 
 
 
 -- magicsum :: Game
