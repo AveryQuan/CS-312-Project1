@@ -47,8 +47,15 @@ getNormalMovesSquare state row col
 
 getDirectionalMovesSquare state row col dir 
     | state !! row !! col == 0 = [] -- Empty
-    | dir == "left" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [[(row,col),(row-1,col+1)]] -- Can't move left diagonally if on topmost row or on rightmost column
-    | dir == "right" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [[(row,col),(row+1,col+1)]] -- Can't move right diagonally if on topmost row or on rightmost column
+    | dir == "left" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [[(row,col),(row+1,col+1)]] -- Can't move left diagonally if on topmost row or on rightmost column
+    | dir == "right" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [[(row,col),(row-1,col+1)]] -- Can't move right diagonally if on bottom row or on rightmost column
+    | dir == "bLeft" = if (col == 0 || row == 0 || (state !! (row-1) !! (col-1)) /= 0) then [] else [[(row,col),(row-1,col-1)]]
+    | dir == "bRight" = if (col == 0 || row == 7 || (state !! (row+1) !! (col-1)) /= 0) then [] else [[(row,col),(row+1,col-1)]] 
+
+getDirectionalJumpsSquare state row col dir 
+    | state !! row !! col == 0 = [] -- Empty
+    | dir == "left" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [[(row,col),(row+1,col+1)]] -- Can't move left diagonally if on top row or on rightmost column
+    | dir == "right" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [[(row,col),(row-1,col+1)]] -- Can't move right diagonally if on bottom row or on rightmost column
     | dir == "bLeft" = if (col == 0 || row == 0 || (state !! (row-1) !! (col-1)) /= 0) then [] else [[(row,col),(row-1,col-1)]]
     | dir == "bRight" = if (col == 0 || row == 7 || (state !! (row+1) !! (col-1)) /= 0) then [] else [[(row,col),(row+1,col-1)]] 
 
