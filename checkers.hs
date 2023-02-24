@@ -30,11 +30,12 @@ reverseinitialRow = [2,0,2,0,0,0,1,0]
 initialState :: Board
 initialState = [initialRow, reverseinitialRow,initialRow,reverseinitialRow,initialRow,reverseinitialRow,initialRow,reverseinitialRow]
 
-getNormalMoves state = getNormalMovesHelp state 0 0
+getNormalMoves state color = getNormalMovesHelp state 0 0 color -- color 2 for red, 1 for black.
 
-getNormalMovesHelp [] _ _ = []
-getNormalMovesHelp state row col 
-    | state !! row !! col /= 0 = []
+getNormalMovesHelp _ 8 _ _= []
+getNormalMovesHelp state row col color -- When iterating through 
+    | col == 7 = if (state !! row !! col /= color && state !! row !! col /= (color+2))  then getNormalMovesHelp state (row+1) 0 color else getNormalMovesSquare state row col ++ getNormalMovesHelp state (row+1) 0 color
+    | otherwise = if (state !! row !! col /= color && state !! row !! col /= (color+2))  then getNormalMovesHelp state row (col+1) color else getNormalMovesSquare state row col ++ getNormalMovesHelp state row (col+1) color                
 
 -- Gets all possible normal moves for a square by first checking its content.
 getNormalMovesSquare [] _ _ = []
