@@ -63,6 +63,21 @@ getDirectionalJumpsSquare state row col dir
 
 jumpable state row col color = (state !! row !! col /= 0) && (((state !! row !! col ) `mod` 2) /= (color `mod` 2)) -- this is the square we want to jump over, must be different color and non-empty.
 
+getJumpMoves state color = getJumpMovesHelp state 0 0 color -- color 2 for red, 1 for black.
+
+getJumpMovesHelp _ 8 _ _= []
+getJumpMovesHelp state row col color -- When iterating through 
+    | col == 7 = if (state !! row !! col /= color && state !! row !! col /= (color+2))  then getJumpMovesHelp state (row+1) 0 color else getJumpMovesSquare state row col ++ getJumpMovesHelp state (row+1) 0 color
+    | otherwise = if (state !! row !! col /= color && state !! row !! col /= (color+2))  then getJumpMovesHelp state row (col+1) color else getJumpMovesSquare state row col ++ getJumpMovesHelp state row (col+1) color      
+
+getJumpMovesSquare [] _ _ = []
+getJumpMovesSquare state row col 
+    | state !! row !! col == 0 = [] --Empty square, no move
+    | state !! row !! col == 1 = getDirectionalJumpsSquare state row col "bLeft" ++ getDirectionalJumpsSquare state row col "bRight"  -- This is the left and right of a black piece going from the right side of the board to the left.
+    | state !! row !! col == 2 = getDirectionalJumpsSquare state row col "left" ++ getDirectionalJumpsSquare state row col "right"   -- This is the left and right of a red piece going from the left side of the board to the right.
+    | state !! row !! col >= 3 = getDirectionalJumpsSquare state row col "bLeft" ++ getDirectionalJumpsSquare state row col "bRight" ++ getDirectionalJumpsSquare state row col "left" ++ getDirectionalJumpsSquare state row col "right" 
+
+
 -- This assigns a value to the element in (row,col) in state.
 assign state row col value 
     | value < 0 || value > 4 = state -- May only assign valid values f in [1,4] 
@@ -148,9 +163,9 @@ convertValueToPiece value
 testBoard :: [[Int]]
 testBoard = [[0, 1, 0, 0, 0, 2, 0, 0],
             [1, 0, 0, 0, 2, 0, 0, 0],
-            [0, 0, 0, 1, 0, 2, 0, 2],
-            [1, 0, 1, 0, 0, 0, 0, 0],
-            [0, 1, 0, 1, 0, 2, 0, 2],
-            [1, 0, 1, 0, 2, 0, 2, 0],
+            [0, 0, 0, 1, 0, 1, 0, 2],
+            [1, 0, 1, 0, 2, 0, 0, 0],
+            [0, 1, 0, 1, 0, 1, 0, 2],
+            [1, 0, 0, 0, 2, 0, 2, 0],
             [0, 0, 0, 0, 0, 2, 0, 2],
             [0, 0, 1, 0, 0, 0, 0, 0]]
