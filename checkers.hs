@@ -67,7 +67,17 @@ jumpable state row col color = (state !! row !! col /= 0) && (((state !! row !! 
 assign state row col value 
     | value < 0 || value > 4 = state -- May only assign valid values f in [1,4] 
     | otherwise = fst(splitAt row state) ++ [fst(splitAt col (state !! row)) ++ [value] ++ snd(splitAt (col+1) (state !! row))] ++ snd(splitAt (row+1) state)
-    
+
+makeMove state (o1,o2) (n1,n2) 
+    | state !! n1 !! n2 /= 0 = state -- Do nothing.
+    | otherwise = assign (assign state n1 n2 (state !! o1 !! o2)) o1 o2 0 --Make normal move.
+
+makeJump state (o1,o2) (n1,n2) 
+    | state !! n1 !! n2 /= 0 = state -- Do nothing: Destination occupied.
+    | state !! ((o1+n1) `div` 2) !! ((o2+n2) `div` 2) == 0 || ((state  !! ((o1+n1) `div` 2) !! ((o2+n2) `div` 2)) `mod` 2) == (state !! o1 !! o2 `mod` 2) = state -- Do nothing.
+    | otherwise =  assign ( assign (assign state n1 n2 (state !! o1 !! o2)) ((o1+n1) `div` 2) ((o2+n2) `div` 2) 0 ) o1 o2 0 --Make normal move. assign state n1 n2 (state !! o1 !! o2) --
+
+
 -- magicsum :: Game
 -- magicsum move (State (mine,others) available) 
 --     | win move mine                = EndOfGame 1  magicsum_start     -- agent wins
