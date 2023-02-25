@@ -52,6 +52,8 @@ getDirectionalMovesSquare state row col dir
     | dir == "bLeft" = if (col == 0 || row == 0 || (state !! (row-1) !! (col-1)) /= 0) then [] else [[(row,col),(row-1,col-1)]]
     | dir == "bRight" = if (col == 0 || row == 7 || (state !! (row+1) !! (col-1)) /= 0) then [] else [[(row,col),(row+1,col-1)]] 
 
+
+-- Make this function work with all dirs somehow?
 getDirectionalJumpsSquare state row col dir 
     | state !! row !! col == 0 = [] -- Empty
     | dir == "left" = if (row >= 6 || col >= 6 || (state !! (row+2) !! (col+2)) /= 0 || (jumpable state (row+1) (col+1) (state !! row !! col)) == False) then [] else [[(row,col),(row+2,col+2)]] -- Can't move left diagonally if on top row or on rightmost column
@@ -59,7 +61,13 @@ getDirectionalJumpsSquare state row col dir
     | dir == "bLeft" = if (col <= 1 || row <= 1 || (state !! (row-2) !! (col-2)) /= 0 || (jumpable state (row-1) (col-1) (state !! row !! col)) == False) then [] else [[(row,col),(row-2,col-2)]]
     | dir == "bRight" = if (col <= 1 || row >= 6 || (state !! (row+2) !! (col-2)) /= 0 || (jumpable state (row+1) (col-1) (state !! row !! col)) == False) then [] else [[(row,col),(row+2,col-2)]] 
 
-jumpable state row col color = (state !! row !! col /= 0) && (((state !! row !! col ) `mod` 2) /= (color `mod` 2))
+jumpable state row col color = (state !! row !! col /= 0) && (((state !! row !! col ) `mod` 2) /= (color `mod` 2)) -- this is the square we want to jump over, must be different color and non-empty.
+
+-- This assigns a value to the element in (row,col) in state.
+assign state row col value 
+    | value < 0 || value > 4 = state -- May only assign valid values f in [1,4] 
+    | otherwise = fst(splitAt row state) ++ [fst(splitAt col (state !! row)) ++ [value] ++ snd(splitAt (col+1) (state !! row))] ++ snd(splitAt (row+1) state)
+    
 -- magicsum :: Game
 -- magicsum move (State (mine,others) available) 
 --     | win move mine                = EndOfGame 1  magicsum_start     -- agent wins
