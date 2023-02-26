@@ -132,7 +132,13 @@ flipPlayer state =
 
 -- TODO: given an action, update the current board (without flipping players)
 updateState :: Action -> InternalState -> InternalState
-updateState move state = state
+updateState (Action []) state = state
+updateState (Action [a]) state = state
+updateState (Action (f:s:rest)) (board, player)
+    | (max (fst(f)) (fst(s))) - (min  (fst(f)) (fst(s))) == 1 && (max (snd(f)) (snd(s))) - (min (snd(f)) (snd(s))) == 1 = 
+        if (length (s:rest) == 2) then ((makeMove board f s), player) 
+        else updateState (Action (s:rest)) ((makeMove board f s),player)
+    | otherwise = if (length (s:rest) == 2) then ((makeJump board f s), player) else updateState (Action (s:rest)) ((makeJump board f s), player)
 
 -- magicsum :: Game
 -- magicsum move (State (mine,others) available) 
