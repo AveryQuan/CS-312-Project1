@@ -130,7 +130,6 @@ flipPlayer state =
             then (board, whitePlayer)
         else (board, blackPlayer)
 
--- TODO: given an action, update the current board (without flipping players)
 updateState :: Action -> InternalState -> InternalState
 updateState (Action []) state = state
 updateState (Action [a]) state = state
