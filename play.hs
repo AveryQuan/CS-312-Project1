@@ -6,10 +6,13 @@ module Play where
 -- :load Play
 
 --import MagicSum
-import CountGame
+-- import CountGame
+import Checkers
 
-import Minimax  -- make sure same game is imported in Minimax
+-- import Minimax  -- make sure same game is imported in Minimax
 --import Minimax_mem
+
+import IOHelpers
 
 import System.IO
 import Text.Read   (readMaybe)
@@ -24,7 +27,7 @@ play game start_state opponent ts =
   do
       putStrLn ("Tournament results: "++ show wins++ " wins "++show losses++" losses "++show ties++" ties")
       putStrLn "Who starts? 0=you, 1=computer, 2=exit."
-      line <- getLine
+      line <- getLineFixed
       if line == "0"
         then
             person_play game (ContinueGame start_state) opponent ts
@@ -40,8 +43,11 @@ person_play :: Game -> Result -> Player -> TournammentState -> IO TournammentSta
 person_play game (ContinueGame state) opponent ts =
    do
       let State internal avail = state
-      putStrLn ("State: "++show internal++" choose one of "++show avail)
-      line <- getLine
+      let (board, _) = internal
+      -- putStrLn ("State: "++show internal++" choose one of "++show avail)
+      printBoard board
+      putStrLn ("Available moves: " ++ show avail)
+      line <- getLineFixed
       case (readMaybe line :: Maybe Action) of
         Nothing ->
            person_play game (ContinueGame state) opponent ts
@@ -87,6 +93,9 @@ update_tournament_state val (wins,losses,ties)
   | otherwise = do
       putStrLn "Computer won!"
       return (wins,losses+1,ties)
+
+-- If you imported Checkers try:
+-- play checkers checkers_start simple_player (0,0,0)
 
 -- If you imported MagicSum here and in Minimax try:
 -- play magicsum magicsum_start simple_player (0,0,0)

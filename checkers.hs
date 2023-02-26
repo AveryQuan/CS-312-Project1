@@ -156,8 +156,6 @@ win state = (getAvailableMoves (flipPlayer state) == [])
 -- reset
 checkers_start = State initialState (getAvailableMoves initialState)
 
--- TODO: redefine Show
--- show and read actions just as the integer
 instance Show Action where
     show (Action i) = show i
 instance Read Action where
