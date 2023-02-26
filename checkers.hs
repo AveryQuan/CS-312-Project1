@@ -17,27 +17,48 @@ type Game = Action -> State -> Result
 type Player = State -> Action
 
 ------ Checkers -------
-
--- TODO: redefine Action
-data Action = Action Int                   -- a move for a player is just an Int
+data Action = Action [(Int,Int)]                -- a move for a player is a sequence of pairs
          deriving (Ord,Eq)
--- TODO: redefine InternalState
-type InternalState = ([Action],[Action])   -- (self,other)
+type Board = [[Int]]
+type InternalState = (Board, ActivePlayer)      -- state of the board and current colour
+type ActivePlayer = Int                         -- 1 = black; 2 = red/white 
 
+----  Initialization ----
 initialRow = [0,2,0,0,0,1,0,1]
 reverseinitialRow = [2,0,2,0,0,0,1,0]
 
-initialState :: Board
-initialState = [initialRow, reverseinitialRow,initialRow,reverseinitialRow,initialRow,reverseinitialRow,initialRow,reverseinitialRow]
+initialBoard :: Board
+initialBoard = [initialRow,reverseinitialRow,initialRow,reverseinitialRow,initialRow,reverseinitialRow,initialRow,reverseinitialRow]
 
-getNormalMoves state color = getNormalMovesHelp state 0 0 color -- color 2 for red, 1 for black.
+blackPlayer = 1
+whitePlayer = 2
 
+initialState = (initialBoard, blackPlayer)
+
+---- Move Generation ----
+getAvailableMoves:: InternalState -> [Action] 
+getAvailableMoves state =
+    let (board, activePlayer) = state
+    in
+    if getJumpMoves board activePlayer == []
+        then getNormalMoves board activePlayer
+    else getJumpMoves board activePlayer
+
+getNormalMoves :: Board -> ActivePlayer -> [Action]
+getNormalMoves state color = getNormalMovesHelp state 0 0 color -- color 2 for white/red, 1 for black.
+
+getNormalMovesHelp :: Board -> Int -> Int -> ActivePlayer -> [Action]
 getNormalMovesHelp _ 8 _ _= []
 getNormalMovesHelp state row col color -- When iterating through 
-    | col == 7 = if (state !! row !! col /= color && state !! row !! col /= (color+2))  then getNormalMovesHelp state (row+1) 0 color else getNormalMovesSquare state row col ++ getNormalMovesHelp state (row+1) 0 color
-    | otherwise = if (state !! row !! col /= color && state !! row !! col /= (color+2))  then getNormalMovesHelp state row (col+1) color else getNormalMovesSquare state row col ++ getNormalMovesHelp state row (col+1) color                
+    | col == 7 = if (state !! row !! col /= color && state !! row !! col /= (color+2))  
+        then getNormalMovesHelp state (row+1) 0 color 
+        else getNormalMovesSquare state row col ++ getNormalMovesHelp state (row+1) 0 color
+    | otherwise = if (state !! row !! col /= color && state !! row !! col /= (color+2))  
+        then getNormalMovesHelp state row (col+1) color 
+        else getNormalMovesSquare state row col ++ getNormalMovesHelp state row (col+1) color                
 
 -- Gets all possible normal moves for a square by first checking its content.
+getNormalMovesSquare :: Board -> Int -> Int -> [Action]
 getNormalMovesSquare [] _ _ = []
 getNormalMovesSquare state row col 
     | state !! row !! col == 0 = [] --Empty square, no move
@@ -45,31 +66,37 @@ getNormalMovesSquare state row col
     | state !! row !! col == 2 = getDirectionalMovesSquare state row col "left" ++ getDirectionalMovesSquare state row col "right"   -- This is the left and right of a red piece going from the left side of the board to the right.
     | state !! row !! col >= 3 = getDirectionalMovesSquare state row col "bLeft" ++ getDirectionalMovesSquare state row col "bRight" ++ getDirectionalMovesSquare state row col "left" ++ getDirectionalMovesSquare state row col "right"  -- Kings move in 1 of 4 diag
 
+getDirectionalMovesSquare :: Board -> Int -> Int -> String -> [Action]
 getDirectionalMovesSquare state row col dir 
     | state !! row !! col == 0 = [] -- Empty
-    | dir == "left" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [[(row,col),(row+1,col+1)]] -- Can't move left diagonally if on topmost row or on rightmost column
-    | dir == "right" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [[(row,col),(row-1,col+1)]] -- Can't move right diagonally if on bottom row or on rightmost column
-    | dir == "bLeft" = if (col == 0 || row == 0 || (state !! (row-1) !! (col-1)) /= 0) then [] else [[(row,col),(row-1,col-1)]]
-    | dir == "bRight" = if (col == 0 || row == 7 || (state !! (row+1) !! (col-1)) /= 0) then [] else [[(row,col),(row+1,col-1)]] 
+    | dir == "left" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [Action [(row,col),(row+1,col+1)]] -- Can't move left diagonally if on topmost row or on rightmost column
+    | dir == "right" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [Action [(row,col),(row-1,col+1)]] -- Can't move right diagonally if on bottom row or on rightmost column
+    | dir == "bLeft" = if (col == 0 || row == 0 || (state !! (row-1) !! (col-1)) /= 0) then [] else [Action [(row,col),(row-1,col-1)]]
+    | dir == "bRight" = if (col == 0 || row == 7 || (state !! (row+1) !! (col-1)) /= 0) then [] else [Action [(row,col),(row+1,col-1)]] 
 
 
 -- Make this function work with all dirs somehow?
+getDirectionalJumpsSquare :: Board -> Int -> Int -> String -> [Action]
 getDirectionalJumpsSquare state row col dir 
     | state !! row !! col == 0 = [] -- Empty
-    | dir == "left" = if (row >= 6 || col >= 6 || (state !! (row+2) !! (col+2)) /= 0 || (jumpable state (row+1) (col+1) (state !! row !! col)) == False) then [] else [[(row,col),(row+2,col+2)]] -- Can't move left diagonally if on top row or on rightmost column
-    | dir == "right" = if (row <= 1 || col >= 6 || (state !! (row-2) !! (col+2)) /= 0 || (jumpable state (row-1) (col+1) (state !! row !! col)) == False) then [] else [[(row,col),(row-2,col+2)]] -- Can't move right diagonally if on bottom row or on rightmost column
-    | dir == "bLeft" = if (col <= 1 || row <= 1 || (state !! (row-2) !! (col-2)) /= 0 || (jumpable state (row-1) (col-1) (state !! row !! col)) == False) then [] else [[(row,col),(row-2,col-2)]]
-    | dir == "bRight" = if (col <= 1 || row >= 6 || (state !! (row+2) !! (col-2)) /= 0 || (jumpable state (row+1) (col-1) (state !! row !! col)) == False) then [] else [[(row,col),(row+2,col-2)]] 
+    | dir == "left" = if (row >= 6 || col >= 6 || (state !! (row+2) !! (col+2)) /= 0 || (jumpable state (row+1) (col+1) (state !! row !! col)) == False) then [] else [Action [(row,col),(row+2,col+2)]] -- Can't move left diagonally if on top row or on rightmost column
+    | dir == "right" = if (row <= 1 || col >= 6 || (state !! (row-2) !! (col+2)) /= 0 || (jumpable state (row-1) (col+1) (state !! row !! col)) == False) then [] else [Action [(row,col),(row-2,col+2)]] -- Can't move right diagonally if on bottom row or on rightmost column
+    | dir == "bLeft" = if (col <= 1 || row <= 1 || (state !! (row-2) !! (col-2)) /= 0 || (jumpable state (row-1) (col-1) (state !! row !! col)) == False) then [] else [Action [(row,col),(row-2,col-2)]]
+    | dir == "bRight" = if (col <= 1 || row >= 6 || (state !! (row+2) !! (col-2)) /= 0 || (jumpable state (row+1) (col-1) (state !! row !! col)) == False) then [] else [Action [(row,col),(row+2,col-2)]] 
 
+jumpable :: Board -> Int -> Int -> ActivePlayer -> Bool
 jumpable state row col color = (state !! row !! col /= 0) && (((state !! row !! col ) `mod` 2) /= (color `mod` 2)) -- this is the square we want to jump over, must be different color and non-empty.
 
+getJumpMoves :: Board -> ActivePlayer -> [Action]
 getJumpMoves state color = getJumpMovesHelp state 0 0 color -- color 2 for red, 1 for black.
 
+getJumpMovesHelp :: Board -> Int -> Int -> ActivePlayer -> [Action]
 getJumpMovesHelp _ 8 _ _= []
 getJumpMovesHelp state row col color -- When iterating through 
     | col == 7 = if (state !! row !! col /= color && state !! row !! col /= (color+2))  then getJumpMovesHelp state (row+1) 0 color else getJumpMovesSquare state row col ++ getJumpMovesHelp state (row+1) 0 color
     | otherwise = if (state !! row !! col /= color && state !! row !! col /= (color+2))  then getJumpMovesHelp state row (col+1) color else getJumpMovesSquare state row col ++ getJumpMovesHelp state row (col+1) color      
 
+getJumpMovesSquare :: Board -> Int -> Int -> [Action]
 getJumpMovesSquare [] _ _ = []
 getJumpMovesSquare state row col 
     | state !! row !! col == 0 = [] --Empty square, no move
@@ -77,7 +104,7 @@ getJumpMovesSquare state row col
     | state !! row !! col == 2 = getDirectionalJumpsSquare state row col "left" ++ getDirectionalJumpsSquare state row col "right"   -- This is the left and right of a red piece going from the left side of the board to the right.
     | state !! row !! col >= 3 = getDirectionalJumpsSquare state row col "bLeft" ++ getDirectionalJumpsSquare state row col "bRight" ++ getDirectionalJumpsSquare state row col "left" ++ getDirectionalJumpsSquare state row col "right" 
 
-
+---- State Update ----
 -- This assigns a value to the element in (row,col) in state.
 assign state row col value 
     | value < 0 || value > 4 = state -- May only assign valid values f in [1,4] 
@@ -92,6 +119,13 @@ makeJump state (o1,o2) (n1,n2)
     | state !! ((o1+n1) `div` 2) !! ((o2+n2) `div` 2) == 0 || ((state  !! ((o1+n1) `div` 2) !! ((o2+n2) `div` 2)) `mod` 2) == (state !! o1 !! o2 `mod` 2) = state -- Do nothing.
     | otherwise =  assign ( assign (assign state n1 n2 (state !! o1 !! o2)) ((o1+n1) `div` 2) ((o2+n2) `div` 2) 0 ) o1 o2 0 --Make normal move. assign state n1 n2 (state !! o1 !! o2) --
 
+flipPlayer :: InternalState -> InternalState
+flipPlayer state =
+    let (board, activePlayer) = state
+    in
+        if (activePlayer == blackPlayer) 
+            then (board, whitePlayer)
+        else (board, blackPlayer)
 
 -- magicsum :: Game
 -- magicsum move (State (mine,others) available) 
@@ -123,6 +157,8 @@ instance Read Action where
 -- this player has an ordering of the moves, and chooses the first one available
 -- simple_player (State _ avail) = head [Action e | e <- [5,6,4,2,8,1,3,7,9],
 --                                                Action e `elem` avail]
+-- simple_player :: Player
+-- simple_player (State board)
 
 
 -- Test cases
@@ -134,7 +170,7 @@ instance Read Action where
 
 
 ------- temporary -------
-type Board = [[Int]]
+-- type Board = [[Int]]
 
 printBoard :: Board -> IO()
 printBoard board = do
