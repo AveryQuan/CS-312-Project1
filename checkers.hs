@@ -165,14 +165,9 @@ instance Read Action where
 
 ------- A Player -------
 
--- TODO: player that picks a random move from list of all available moves
--- prereq: function to generate all available moves given State
--- simple_player :: Player
--- this player has an ordering of the moves, and chooses the first one available
--- simple_player (State _ avail) = head [Action e | e <- [5,6,4,2,8,1,3,7,9],
---                                                Action e `elem` avail]
--- simple_player :: Player
--- simple_player (State board)
+-- this player chooses the first generated move always
+simple_player :: Player
+simple_player (State _ avail) = head avail
 
 
 -- Test cases
