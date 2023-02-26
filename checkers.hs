@@ -106,14 +106,17 @@ getJumpMovesSquare state row col
 
 ---- State Update ----
 -- This assigns a value to the element in (row,col) in state.
+assign :: Board -> Int -> Int -> Int -> Board
 assign state row col value 
     | value < 0 || value > 4 = state -- May only assign valid values f in [1,4] 
     | otherwise = fst(splitAt row state) ++ [fst(splitAt col (state !! row)) ++ [value] ++ snd(splitAt (col+1) (state !! row))] ++ snd(splitAt (row+1) state)
 
+makeMove :: Board -> (Int, Int) -> (Int, Int) -> Board
 makeMove state (o1,o2) (n1,n2) 
     | state !! n1 !! n2 /= 0 = state -- Do nothing.
     | otherwise = assign (assign state n1 n2 (state !! o1 !! o2)) o1 o2 0 --Make normal move.
 
+makeJump :: Board -> (Int, Int) -> (Int, Int) -> Board
 makeJump state (o1,o2) (n1,n2) 
     | state !! n1 !! n2 /= 0 = state -- Do nothing: Destination occupied.
     | state !! ((o1+n1) `div` 2) !! ((o2+n2) `div` 2) == 0 || ((state  !! ((o1+n1) `div` 2) !! ((o2+n2) `div` 2)) `mod` 2) == (state !! o1 !! o2 `mod` 2) = state -- Do nothing.
@@ -127,6 +130,10 @@ flipPlayer state =
             then (board, whitePlayer)
         else (board, blackPlayer)
 
+-- TODO: given an action, update the current board (without flipping players)
+updateState :: Action -> InternalState -> InternalState
+updateState move state = state
+
 -- magicsum :: Game
 -- magicsum move (State (mine,others) available) 
 --     | win move mine                = EndOfGame 1  magicsum_start     -- agent wins
@@ -135,12 +142,19 @@ flipPlayer state =
 --           ContinueGame (State (others,(move:mine))   -- note roles have flipped
 --                         [act | act <- available, act /= move])
 
--- TODO: redefine win
--- win n ns = the agent wins if it selects n given it has already selected ns
--- win :: Action -> [Action] -> Bool
--- win (Action n) ns  = or [n+x+y==15 | Action x <- ns, Action y <- ns, x/=y]
+checkers :: Game
+checkers move (State internalState available)
+    | win updatedState                  = EndOfGame 1 checkers_start
+    | otherwise                         =
+        ContinueGame (State (flipPlayer updatedState) (getAvailableMoves (flipPlayer updatedState)))
+            where updatedState = (updateState move internalState)
 
--- magicsum_start = State ([],[]) [Action n | n <- [1..9]]
+-- if the opponent cannot make a move, then current player wins
+win :: InternalState -> Bool
+win state = (getAvailableMoves (flipPlayer state) == [])
+
+-- reset
+checkers_start = State initialState (getAvailableMoves initialState)
 
 -- TODO: redefine Show
 -- show and read actions just as the integer
