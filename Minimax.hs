@@ -5,8 +5,6 @@ module Minimax where
 -- ghci
 -- :load Minimax
 import Checkers
---import MagicSum
--- import CountGame
 
 maxDepth = 4
 
@@ -60,20 +58,6 @@ getOpponentNumber player
 -- show timings for evaluation:
 -- :set +s
 
---Try (for MagicSum)
--- as lst = [Action i | i <- lst]     -- make it easier to type
--- minimax magicsum (State (as [8,5,4], as [1,2,6,9])  (as [3,7]))
--- minimax magicsum (State (as [8,5], as [1,2])  (as [3,4,6,7,9]))
--- minimax magicsum (State (as [1,2], as [4,5,8])  (as [3,6,7,9]))
--- minimax magicsum (State (as [4,5,8], as [1,2,9])  (as [3,6,7]))
--- minimax magicsum (State (as [1,2,4,5], as [3,7,8,9])  (as [6]))
--- minimax magicsum (State (as [1,2,4,5], as [3,6,8,9])  (as [7]))
--- minimax magicsum (State (as [1,2,5], as [3,6,8,9])  (as [4,7]))
--- minimax magicsum (State (as [1,5], as [3,8])  (as [2,4,6,7,9]))
--- minimax magicsum (State (as [1], as [5,8]) (as [2,3,4,6,7,9]))
--- minimax magicsum (State (as [5,8], as [1,2])  (as [3,4,6,7,9]))
--- minimax magicsum (State (as [5], as [3,8]) (as [1,2,4,6,7,9]))
--- minimax magicsum (State ([], [])  (as [1..9]))
 -- minimax checkers checkers_start 0
 -- minimax checkers simple_start 0
 
@@ -95,16 +79,6 @@ argmax f (h:t)
       (bt,ft) = argmax f t
       fh = f h
 
---- after surfing the web, I found this is the standard argmaxWithMax
---  http://hackage.haskell.org/package/list-extras-0.4.1.4/docs/Data-List-Extras-Argmax.html
-
 -- Test case:
 -- argmax (\x -> 5- (x-2)^2) [0..10]
 -- argmax (\x -> 1 + 4*x - x^2) [0..10]
-
--- another implementation
-argmax2 :: Ord v => (e -> v) -> [e] -> (e,v)
-argmax2 f (h:t) =
-   foldr (\ e (et,vt) -> let fe = f e in
-                         if (fe > vt) then (e,fe) else (et,vt))
-         (h, f h) t

@@ -142,14 +142,6 @@ updateState (Action (f:s:rest)) (board, player)
         else updateState (Action (s:rest)) ((makeMove board f s),player)
     | otherwise = if (length (s:rest) == 2) then ((makeJump board f s), player) else updateState (Action (s:rest)) ((makeJump board f s), player)
 
--- magicsum :: Game
--- magicsum move (State (mine,others) available) 
---     | win move mine                = EndOfGame 1  magicsum_start     -- agent wins
---     | available == [move]          = EndOfGame 0  magicsum_start     -- no more moves, tie
---     | otherwise                    =
---           ContinueGame (State (others,(move:mine))   -- note roles have flipped
---                         [act | act <- available, act /= move])
-
 checkers :: Game
 checkers move (State internalState available)
     | win updatedState                  = EndOfGame 1 checkers_start
@@ -165,8 +157,6 @@ win state = (getAvailableMoves (flipPlayer state) == [])
 checkers_start = State initialState (getAvailableMoves initialState)
 simple_start = State simpleState (getAvailableMoves simpleState)
 
--- TODO: redefine Show
--- show and read actions just as the integer
 instance Show Action where
     show (Action i) = show i
 instance Read Action where
@@ -178,17 +168,7 @@ instance Read Action where
 simple_player :: Player
 simple_player (State _ avail) = head avail
 
-
--- Test cases
--- magicsum (simple_player magicsum_start) magicsum_start
--- a i = Action i  -- make it easier to type
--- as lst = [Action i | i <- lst]
--- magicsum (a 6) (State (as [3,5], as [2,7]) (as [1,4,6,8,9])) 
--- magicsum (a 3) (State (as [5,7], as [2,9]) (as [1,3,4,6,8])) 
-
-
-------- temporary -------
--- type Board = [[Int]]
+------- Board IO -------
 
 printBoard :: Board -> IO()
 printBoard board = do
