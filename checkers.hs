@@ -20,7 +20,7 @@ type Player = State -> Action
 data Action = Action [(Int,Int)]                -- a move for a player is a sequence of pairs
          deriving (Ord,Eq)
 type Board = [[Int]]
-type InternalState = (Board, ActivePlayer)      -- state of the board and current colour
+type InternalState = (Board, ActivePlayer) -- state of the board and current colour
 type ActivePlayer = Int                         -- 1 = black; 2 = red/white 
 
 ----  Initialization ----
@@ -34,6 +34,7 @@ blackPlayer = 1
 whitePlayer = 2
 
 initialState = (initialBoard, blackPlayer)
+simpleState = (simpleBoard, blackPlayer)
 
 ---- Move Generation ----
 getAvailableMoves:: InternalState -> [Action] 
@@ -67,7 +68,7 @@ getNormalMovesSquare state row col
     | state !! row !! col >= 3 = getDirectionalMovesSquare state row col "bLeft" ++ getDirectionalMovesSquare state row col "bRight" ++ getDirectionalMovesSquare state row col "left" ++ getDirectionalMovesSquare state row col "right"  -- Kings move in 1 of 4 diag
 
 getDirectionalMovesSquare :: Board -> Int -> Int -> String -> [Action]
-getDirectionalMovesSquare state row col dir 
+getDirectionalMovesSquare state row col dir
     | state !! row !! col == 0 = [] -- Empty
     | dir == "left" = if (row == 7 || col == 7 || (state !! (row+1) !! (col+1)) /= 0) then [] else [Action [(row,col),(row+1,col+1)]] -- Can't move left diagonally if on topmost row or on rightmost column
     | dir == "right" = if (row == 0 || col == 7 || (state !! (row-1) !! (col+1)) /= 0) then [] else [Action [(row,col),(row-1,col+1)]] -- Can't move right diagonally if on bottom row or on rightmost column
@@ -160,6 +161,7 @@ win state = (getAvailableMoves (flipPlayer state) == [])
 
 -- reset
 checkers_start = State initialState (getAvailableMoves initialState)
+simple_start = State simpleState (getAvailableMoves simpleState)
 
 instance Show Action where
     show (Action i) = show i
@@ -217,3 +219,24 @@ testBoard = [[0, 1, 0, 0, 0, 2, 0, 0],
             [1, 0, 0, 0, 2, 0, 2, 0],
             [0, 0, 0, 0, 0, 2, 0, 2],
             [0, 0, 1, 0, 0, 0, 0, 0]]
+
+simpleBoard :: [[Int]]
+simpleBoard =   [
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 2, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0]]
+
+--
+--                [0, 0, 0, 0, 0, 0, 0, 0],
+--                [0, 0, 0, 0, 0, 0, 0, 0],
+--                [0, 0, 0, 0, 0, 0, 0, 0],
+--                [0, 0, 0, 0, 0, 0, 0, 1],
+--                [0, 0, 0, 0, 0, 0, 0, 0],
+--                [0, 0, 0, 0, 0, 2, 0, 0],
+--                [0, 0, 0, 0, 0, 0, 0, 0],
+--                [0, 0, 0, 0, 0, 0, 0, 0]]

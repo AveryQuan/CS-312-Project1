@@ -9,7 +9,7 @@ module Play where
 -- import CountGame
 import Checkers
 
--- import Minimax  -- make sure same game is imported in Minimax
+import Minimax  -- make sure same game is imported in Minimax
 --import Minimax_mem
 
 import IOHelpers
@@ -96,6 +96,7 @@ update_tournament_state val (wins,losses,ties)
 
 -- If you imported Checkers try:
 -- play checkers checkers_start simple_player (0,0,0)
+-- play checkers checkers_start (mm_player checkers) (0,0,0)
 
 -- If you imported MagicSum here and in Minimax try:
 -- play magicsum magicsum_start simple_player (0,0,0)
