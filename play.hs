@@ -68,7 +68,7 @@ person_play game (EndOfGame val start_state) opponent ts =
 computer_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
 -- computer_play game current_result opponent ts
 -- person has played, the computer must now play
-computer_play game (EndOfGame val  start_state) opponent ts =
+computer_play game (EndOfGame val start_state) opponent ts =
    do
       newts <- update_tournament_state val ts
       play game start_state opponent newts

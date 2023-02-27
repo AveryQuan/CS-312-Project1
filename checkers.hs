@@ -109,6 +109,8 @@ getJumpMovesSquare state row col
 assign :: Board -> Int -> Int -> Int -> Board
 assign state row col value 
     | value < 0 || value > 4 = state -- May only assign valid values f in [1,4] 
+    | ((value == 1) && (col == 0)) || ((value == 2) && (col == 7)) = 
+        fst(splitAt row state) ++ [fst(splitAt col (state !! row)) ++ [(value+2)] ++ snd(splitAt (col+1) (state !! row))] ++ snd(splitAt (row+1) state)
     | otherwise = fst(splitAt row state) ++ [fst(splitAt col (state !! row)) ++ [value] ++ snd(splitAt (col+1) (state !! row))] ++ snd(splitAt (row+1) state)
 
 makeMove :: Board -> (Int, Int) -> (Int, Int) -> Board
@@ -161,6 +163,8 @@ win state = (getAvailableMoves (flipPlayer state) == [])
 -- reset
 checkers_start = State initialState (getAvailableMoves initialState)
 
+-- TODO: redefine Show
+-- show and read actions just as the integer
 instance Show Action where
     show (Action i) = show i
 instance Read Action where
