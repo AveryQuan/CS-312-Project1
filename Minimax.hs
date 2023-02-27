@@ -8,7 +8,7 @@ import Checkers
 --import MagicSum
 -- import CountGame
 
-maxDepth = 4
+maxDepth = 3
 
 ----   Determining the best move  ---
 minimax:: Game -> State -> Int -> (Action, Double)
@@ -18,35 +18,40 @@ minimax:: Game -> State -> Int -> (Action, Double)
 minimax game state depth =
       let (State _ actions) = state
       in
-      argmax (valueact game state depth) actions
+      argmax (valueact game state (depth-1)) actions
 
 
 -- valueact game st action  is the value of doing action act in state st for game
 valueact:: Game -> State -> Int -> Action  -> Double
+--valueact game st depth act = value game (game act st) depth
 valueact game st depth act = value game (game act st) depth
+--    | depth == 0 = evaluateBoard st
+--    | otherwise = value game (game act st) depth
+
 
 -- value minimax game result  = value  for current player after result
 value:: Game -> Result -> Int -> Double
-value _  (EndOfGame val _) depth = val
+value _  (EndOfGame val _) depth = val*100
+--value game (ContinueGame st) depth = - snd (minimax game st (depth+1))
 value game (ContinueGame st) depth
-    | depth == maxDepth = evaluateBoard st
-    | otherwise =  - snd (minimax game st (depth+1))   -- (action,value) for next player
+    | depth == 0 = evaluateBoard st
+    | otherwise =  - snd (minimax game st (depth))   -- (action,value) for next player
                                                    -- value for current player is negative of value of the other player
 
 -- return ratio of num player pieces / opponent pieces.
 evaluateBoard:: State -> Double
-evaluateBoard (State (board, player) _) = fromIntegral (getPiecesValue board player) / fromIntegral (getPiecesValue board (getOpponentNumber player))
+evaluateBoard (State (board, player) _) = getPiecesValue board (getOpponentNumber player) - (getPiecesValue board player)
 
-getPiecesValue:: Board -> ActivePlayer -> Int
+getPiecesValue:: Board -> ActivePlayer -> Double
 getPiecesValue board player = foldr (\ col val -> (getNumKings col player) + (getNumNormalPieces col player) + val)  0 board
 
 -- Kings have value of 4
-getNumKings:: [Int] -> ActivePlayer -> Int
-getNumKings col player = length (filter (\piece -> piece == (player+2)) col) * 4
+getNumKings:: [Int] -> ActivePlayer -> Double
+getNumKings col player = fromIntegral (length (filter (\piece -> piece == (player+2)) col) * 4)
 
 -- Pieces have value of 1
-getNumNormalPieces:: [Int] -> ActivePlayer -> Int
-getNumNormalPieces col player = length (filter (\piece -> piece == player) col)
+getNumNormalPieces:: [Int] -> ActivePlayer -> Double
+getNumNormalPieces col player = fromIntegral (length (filter (\piece -> piece == player) col))
 
 getOpponentNumber:: Int -> Int
 getOpponentNumber player
@@ -60,26 +65,13 @@ getOpponentNumber player
 -- show timings for evaluation:
 -- :set +s
 
---Try (for MagicSum)
--- as lst = [Action i | i <- lst]     -- make it easier to type
--- minimax magicsum (State (as [8,5,4], as [1,2,6,9])  (as [3,7]))
--- minimax magicsum (State (as [8,5], as [1,2])  (as [3,4,6,7,9]))
--- minimax magicsum (State (as [1,2], as [4,5,8])  (as [3,6,7,9]))
--- minimax magicsum (State (as [4,5,8], as [1,2,9])  (as [3,6,7]))
--- minimax magicsum (State (as [1,2,4,5], as [3,7,8,9])  (as [6]))
--- minimax magicsum (State (as [1,2,4,5], as [3,6,8,9])  (as [7]))
--- minimax magicsum (State (as [1,2,5], as [3,6,8,9])  (as [4,7]))
--- minimax magicsum (State (as [1,5], as [3,8])  (as [2,4,6,7,9]))
--- minimax magicsum (State (as [1], as [5,8]) (as [2,3,4,6,7,9]))
--- minimax magicsum (State (as [5,8], as [1,2])  (as [3,4,6,7,9]))
--- minimax magicsum (State (as [5], as [3,8]) (as [1,2,4,6,7,9]))
--- minimax magicsum (State ([], [])  (as [1..9]))
--- minimax checkers checkers_start 0
--- minimax checkers simple_start 0
+--Try (for Checkers)
+-- minimax checkers checkers_start 2
+-- minimax checkers simple_start 2
 
 
 mm_player:: Game -> Player
-mm_player game state = fst ( minimax game state 0)
+mm_player game state = fst ( minimax game state maxDepth)
 
 
 -- argmax f lst  = (e, f e) for e <- lsts where f e is maximal
