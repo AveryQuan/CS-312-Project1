@@ -5,8 +5,6 @@ module Minimax where
 -- ghci
 -- :load Minimax
 import Checkers
---import MagicSum
--- import CountGame
 
 maxDepth = 3
 
@@ -87,16 +85,6 @@ argmax f (h:t)
       (bt,ft) = argmax f t
       fh = f h
 
---- after surfing the web, I found this is the standard argmaxWithMax
---  http://hackage.haskell.org/package/list-extras-0.4.1.4/docs/Data-List-Extras-Argmax.html
-
 -- Test case:
 -- argmax (\x -> 5- (x-2)^2) [0..10]
 -- argmax (\x -> 1 + 4*x - x^2) [0..10]
-
--- another implementation
-argmax2 :: Ord v => (e -> v) -> [e] -> (e,v)
-argmax2 f (h:t) =
-   foldr (\ e (et,vt) -> let fe = f e in
-                         if (fe > vt) then (e,fe) else (et,vt))
-         (h, f h) t
