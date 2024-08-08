@@ -2,6 +2,8 @@
 Checkers with AI opponent with varying difficulty
 - AI opponent uses MinMax algorithm
 
+https://wiki.ubc.ca/Course:CPSC312-2023-Checkers
+
 Components to create:
 
 1. checkers.hs
