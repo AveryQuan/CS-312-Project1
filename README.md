@@ -1,4 +1,6 @@
 # CS-312-project
+Checkers with AI opponent with varying difficulty
+- AI opponent uses MinMax algorithm
 
 Components to create:
 
